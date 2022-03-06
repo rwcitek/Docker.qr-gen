@@ -12,6 +12,7 @@ eof
 
 # create image
 docker container commit qrgen qrgen:latest
+docker tag qrgen:latest rwcitek/barcode-gen
 
 # exec an interactive session
 docker exec -it qrgen /bin/bash
@@ -53,3 +54,20 @@ exit
 docker stop qrgen
 
 ```
+
+## For formatting SSNs for input into tax prep software
+```bash
+ssn.qr.code () {
+  # takes an SSN as input, formats it into tab separated parts, twice, and then generates QR code
+  ssn=${1:-123456789}
+  {
+    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1\t\2\t\3\t/'
+    <<< ${ssn} sed -re 's/(...)(..)(....)/\1\t\2\t\3/'
+  } | tee ssn.txt | 
+  docker run --rm -i rwcitek/barcode-gen \
+    qrencode --type=PNG --level=H -o - > /tmp/ssn.qrcode.png
+}
+```
+
+
+

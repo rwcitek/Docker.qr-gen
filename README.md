@@ -61,8 +61,8 @@ ssn.qr.code () {
   # takes an SSN as input, formats it into tab separated parts, twice, and then generates QR code
   ssn=${1:-123456789}
   {
-    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1\t\2\t\3\t/'
-    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1\t\2\t\3\n/'
+    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\t/'
+    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\n/'
   } | tee ssn.txt | 
   docker run --rm -i rwcitek/barcode-gen \
     qrencode --type=PNG --level=H -o - > /tmp/ssn.qrcode.png

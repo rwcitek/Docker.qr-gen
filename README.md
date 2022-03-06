@@ -62,7 +62,7 @@ ssn.qr.code () {
   ssn=${1:-123456789}
   {
     echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1\t\2\t\3\t/'
-    <<< ${ssn} sed -re 's/(...)(..)(....)/\1\t\2\t\3/'
+    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1\t\2\t\3\n/'
   } | tee ssn.txt | 
   docker run --rm -i rwcitek/barcode-gen \
     qrencode --type=PNG --level=H -o - > /tmp/ssn.qrcode.png

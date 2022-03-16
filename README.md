@@ -55,17 +55,22 @@ docker stop qrgen
 
 ```
 
-## For formatting SSNs for input into tax prep software
+## Example use case: formatting SSNs for input into tax prep software
+This takes an SSN, formats it into key strokes, and generates a QR code.
+The QR code can then be scanned as keyboard input for tax prep software.
 ```bash
 ssn.qr.code () {
   # takes an SSN as input, formats it into tab separated parts, twice, and then generates QR code
   ssn=${1:-123456789}
+  (
+  cd $( mktemp -d /tmp/ssn.${ssn}.XXXXXX ) &&
   {
     echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\t/'
     echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\n/'
   } | tee ssn.txt | 
   docker run --rm -i rwcitek/barcode-gen \
-    qrencode --type=PNG --level=H -o - > /tmp/ssn.qrcode.png
+    qrencode --type=PNG --level=H -o - > ssn.qrcode.png
+  )
 }
 ```
 

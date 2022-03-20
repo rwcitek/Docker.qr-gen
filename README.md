@@ -15,7 +15,7 @@ docker container commit qrgen qrgen:latest
 docker tag qrgen:latest rwcitek/barcode-gen
 
 # exec an interactive session
-docker exec -it qrgen /bin/bash
+docker run --rm -it qrgen /bin/bash
 
 # Example 1
 # generate UUID and qrcode

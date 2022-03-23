@@ -1,23 +1,16 @@
 # Generating QR codes within Docker
 
-Initial notes.  Needs some cleanup.
+## Run an interactive container
+```bash
+# run an interactive session in the background
+docker run --rm --name qrgen rwcitek/barcode-gen sleep inf & sleep 1
 
+# exec into it
+docker exec -it qrgen /bin/bash
 ```
-docker run --rm --name qrgen ubuntu:20.04 sleep inf & sleep 1
 
-docker exec -i qrgen /bin/bash << 'eof'
-  apt-get update &&
-  apt-get install -y qrencode uuid-runtime file zbar-tools imagemagick
-eof
-
-# create image
-docker container commit qrgen qrgen:latest
-docker tag qrgen:latest rwcitek/barcode-gen
-
-# exec an interactive session
-docker run --rm -it qrgen /bin/bash
-
-# Example 1
+## Example 1
+```bash
 # generate UUID and qrcode
 uuidgen | tee uuid.txt | qrencode --type=PNG --level=H --output uuid.qrcode.png
 
@@ -27,9 +20,10 @@ convert uuid.qrcode.png -resize 400x400 uuid.qrcode.png
 # display contents of QR code, in this case, the UUID
 zbarimg -q --nodbus --raw uuid.qrcode.png
 cat uuid.txt
+```
 
-
-# Example 2
+## Example 2
+```bash
 ## encode YAML in qrcode
 cat <<eof | tee id.yaml | qrencode --type=PNG --level=H --output id.qrcode.png
 uuid: $( uuidgen )
@@ -47,15 +41,21 @@ cat id.yaml
 zbarimg -q --nodbus --raw id.qrcode.png | sed '$d' | md5sum
 cat id.yaml | md5sum
 } | uniq -c
+```
 
-
-# exit session and kill container
+## Exit session and kill container
+```bash
 exit
 docker stop qrgen
 
 ```
 
-## Example use case: formatting SSNs for input into tax prep software
+## Build the image
+```bash
+docker build --tag rwcitek/barcode-gen docker/
+```
+
+## Example in-line use case: formatting SSNs for input into tax prep software
 This takes an SSN, formats it into key strokes, and generates a QR code.
 The QR code can then be scanned as keyboard input for tax prep software.
 ```bash
@@ -74,5 +74,25 @@ ssn.qr.code () {
 }
 ```
 
+## Using pandoc and tidy
+Formatting the README.md as HTML
+```bash
+cat README.md |
+docker run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
+docker run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > README.html
+```
+Creating an HTML file that contains the QR image
+```bash
+{ cat << eof
+This is the data in the QR code.
+```bash
+$( cat ssn.txt )
+```
+This is the QR code for entering the SSN
+![ssn.qrcode.png](ssn.qrcode.png)
 
-
+eof
+} |
+docker run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
+docker run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > ssn.qr.html
+```

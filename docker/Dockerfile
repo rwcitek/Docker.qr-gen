@@ -5,17 +5,20 @@ MAINTAINER Robert Citek robert.citek@gmail.com
 RUN   DEBIAN_FRONTEND=noninteractive && \
       apt-get update && \
       apt-get install -y \
-        qrencode \
-        uuid-runtime \
         file \
-        zbar-tools \
-        tree \
-        less \
-        rsync \
+        imagemagick \
         jq \
+        less \
+        pandoc \
         poppler-utils \
+        qrencode \
+        rsync \
+        tidy \
+        tree \
+        uuid-runtime \
         vim \
-        imagemagick
+        zbar-tools \
+        ;
 
 COPY Dockerfile /
 

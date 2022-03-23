@@ -85,12 +85,11 @@ Creating an HTML file that contains the QR image
 ```bash
 { cat << eof
 This is the data in the QR code.
-```bash
+$( echo '```bash' )
 $( cat ssn.txt )
-```
+$( echo '```')
 This is the QR code for entering the SSN
 ![ssn.qrcode.png](ssn.qrcode.png)
-
 eof
 } |
 docker run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |

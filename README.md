@@ -86,7 +86,7 @@ Creating an HTML file that contains the QR image
 { cat << eof
 This is the data in the QR code.
 $( echo '```bash' )
-$( cat ssn.txt )
+$( od -bc ssn.txt )
 $( echo '```')
 This is the QR code for entering the SSN
 ![ssn.qrcode.png](ssn.qrcode.png)

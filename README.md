@@ -70,6 +70,20 @@ docker stop qrgen
 ```bash
 docker build --tag rwcitek/barcode-gen docker/
 ```
+## Update/enhance instance
+You can update/enhance the instance by upgrading or adding additional packages.
+For example, you can install the `dmtx-utils` package to read/write data matrix barcodes.
+```bash
+cat <<'eof' | docker exec -i qrgen /bin/bash
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
+  apt-get -y dist-upgrade
+  apt-get install -y \
+    dmtx-utils \
+  ;
+eof
+```
+
 
 ## Example in-line use case: formatting SSNs for input into tax prep software
 This takes an SSN, formats it into key strokes, and generates a QR code.

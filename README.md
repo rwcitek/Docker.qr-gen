@@ -1,5 +1,21 @@
 # Generating QR codes within Docker
 
+## Example: "Hello, world!"
+### Encoding "Hello, world!" into a QR code
+```bash
+echo 'Hello, world!' |
+docker run --rm -i rwcitek/barcode-gen \
+  qrencode --type=PNG --level=H -o - > hello-world.qrcode.png
+```
+### Decoding "Hello, world!" QR code
+```bash
+cat hello-world.qrcode.png |
+docker run --rm -i rwcitek/barcode-gen \
+  zbarimg -q --nodbus --raw -
+```
+
+
+
 ## Run an interactive container
 ```bash
 # run an interactive session in the background

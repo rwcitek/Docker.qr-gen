@@ -70,9 +70,11 @@ docker stop qrgen
 ```bash
 docker build --tag rwcitek/barcode-gen docker/
 ```
+
 ## Update/enhance instance
 You can update/enhance the instance by upgrading or adding additional packages.
-For example, you can install the `dmtx-utils` package to read/write data matrix barcodes.
+For example, you can install the `dmtx-utils` package to read/write data matrix barcodes 
+and the `libeif-examples` to convert HEIF images (iPhone) to JPEG or PNG.
 ```bash
 cat <<'eof' | docker exec -i qrgen /bin/bash
   export DEBIAN_FRONTEND=noninteractive
@@ -80,6 +82,7 @@ cat <<'eof' | docker exec -i qrgen /bin/bash
   apt-get -y dist-upgrade
   apt-get install -y \
     dmtx-utils \
+    libheif-examples \
   ;
 eof
 ```

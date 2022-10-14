@@ -76,6 +76,7 @@ You can update/enhance the instance by upgrading or adding additional packages.
 For example, you can install the `dmtx-utils` package to read/write data matrix barcodes 
 and the `libeif-examples` to convert HEIF images (iPhone) to JPEG or PNG.
 ```bash
+# Update/enhance
 cat <<'eof' | docker exec -i qrgen /bin/bash
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
@@ -85,6 +86,19 @@ cat <<'eof' | docker exec -i qrgen /bin/bash
     libheif-examples \
   ;
 eof
+```
+For example, create and read a Data Matrix bar code encoding "Hello, world!".
+```bash
+# Create Data Matrix barcode
+echo 'Hello, world!' |
+docker exec -i qrgen \
+  dmtxwrite -f PNG -o - > hello-world.data-matrix.png
+```
+```bash
+# Read Data Matrix barcode
+cat hello-world.data-matrix.png |
+docker exec -i qrgen \
+  dmtxread -
 ```
 
 

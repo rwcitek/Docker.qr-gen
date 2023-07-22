@@ -97,7 +97,8 @@ docker container exec -i qrgen /bin/bash <<'eof'
 eof
 ```
 
-For example, create and read a Data Matrix bar code encoding "Hello, world!".
+### Using enhanced instance: Example 1
+Create and read a Data Matrix bar code encoding "Hello, world!".
 ```bash
 # Create Data Matrix barcode
 echo 'Hello, world!' |
@@ -109,6 +110,17 @@ docker container exec -i qrgen \
 cat hello-world.data-matrix.png |
 docker container exec -i qrgen \
   dmtxread -
+```
+
+### Using enhanced instance: Example 2
+Convert HEIF to JPG.  It's convoluted, but then heif-convert does not follow Unix conventions.
+```bash
+cat IMG_1234.HEIC |
+docker container exec -i qrgen /bin/bash -c '
+  cat - > /tmp/zfoo.heic ;
+  heif-convert /tmp/zfoo.heic /tmp/zfoo.jpg >& /dev/null ;
+  cat /tmp/zfoo.jpg ;
+' > IMG_1234.jpg
 ```
 
 ### Stop and remove container

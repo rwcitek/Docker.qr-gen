@@ -4,25 +4,23 @@
 ### Encoding "Hello, world!" into a QR code
 ```bash
 echo 'Hello, world!' |
-docker run --rm -i rwcitek/barcode-gen \
+docker container run --rm -i rwcitek/barcode-gen \
   qrencode --type=PNG --level=H -o - > hello-world.qrcode.png
 ```
 ### Decoding "Hello, world!" QR code
 ```bash
 cat hello-world.qrcode.png |
-docker run --rm -i rwcitek/barcode-gen \
+docker container run --rm -i rwcitek/barcode-gen \
   zbarimg -q --nodbus --raw -
 ```
 
-
-
 ## Run an interactive container
 ```bash
-# run an interactive session in the background
-docker run --rm --name qrgen rwcitek/barcode-gen sleep inf & sleep 1
+# run an instance in the background
+docker container run --rm --name qrgen rwcitek/barcode-gen sleep inf & sleep 1
 
 # exec into it
-docker exec -it qrgen /bin/bash
+docker container exec -it qrgen /bin/bash
 ```
 
 ## Example 1
@@ -62,13 +60,13 @@ cat id.yaml | md5sum
 ## Exit session and kill container
 ```bash
 exit
-docker stop qrgen
+docker container stop qrgen
 
 ```
 
 ## Build the image
 ```bash
-docker build --tag rwcitek/barcode-gen docker/
+docker image build --tag rwcitek/barcode-gen docker/
 ```
 
 ## Update/enhance instance
@@ -77,7 +75,7 @@ For example, you can install the `dmtx-utils` package to read/write data matrix 
 and the `libeif-examples` to convert HEIF images (iPhone) to JPEG or PNG.
 ```bash
 # Update/enhance
-cat <<'eof' | docker exec -i qrgen /bin/bash
+docker container exec -i qrgen /bin/bash <<'eof'
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get -y dist-upgrade
@@ -87,17 +85,34 @@ cat <<'eof' | docker exec -i qrgen /bin/bash
   ;
 eof
 ```
+
+Using the background instance to create or decode a QR code similar to the code above.
+
+```bash
+# Encoding "Hello, world!" to QR code
+echo 'Hello, world!' |
+docker container exec -i qrgen \
+  qrencode --type=PNG --level=H -o - > hello-world.qrcode.v02.png
+```
+
+```bash
+# Decoding "Hello, world!" QR code
+cat hello-world.qrcode.v02.png |
+docker container exec -i qrgen \
+  zbarimg -q --nodbus --raw -
+```
+
 For example, create and read a Data Matrix bar code encoding "Hello, world!".
 ```bash
 # Create Data Matrix barcode
 echo 'Hello, world!' |
-docker exec -i qrgen \
+docker container exec -i qrgen \
   dmtxwrite -f PNG -o - > hello-world.data-matrix.png
 ```
 ```bash
 # Read Data Matrix barcode
 cat hello-world.data-matrix.png |
-docker exec -i qrgen \
+docker container exec -i qrgen \
   dmtxread -
 ```
 
@@ -108,14 +123,15 @@ The QR code can then be scanned as keyboard input for tax prep software.
 ```bash
 ssn.qr.code () {
   # takes an SSN as input, formats it into tab separated parts, twice, and then generates QR code
-  ssn=${1:-123456789}
+  ssn=${@:-123456789}
+  ssn=$( <<< "${ssn}" tr -dc [0-9] )
   (
-  cd $( mktemp -d /tmp/ssn.${ssn}.XXXXXX ) &&
+  cd $( mktemp -d /tmp/ssn."${ssn}".XXXXXX ) &&
   {
-    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\t/'
-    echo -n ${ssn} | sed -re 's/(...)(..)(....)/\1 \2 \3\n/'
+    echo -n "${ssn}" | sed -re 's/([0-9]{3})([0-9]{2})([0-9]{4})/\1 \2 \3\t/'
+    echo -n "${ssn}" | sed -re 's/([0-9]{3})([0-9]{2})([0-9]{4})/\1 \2 \3\n/'
   } | tee ssn.txt | 
-  docker run --rm -i rwcitek/barcode-gen \
+  docker container run --rm -i rwcitek/barcode-gen \
     qrencode --type=PNG --level=H -o - > ssn.qrcode.png
   )
 }
@@ -125,8 +141,8 @@ ssn.qr.code () {
 Formatting the README.md as HTML
 ```bash
 cat README.md |
-docker run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
-docker run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > README.html
+docker container run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
+docker container run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > README.html
 ```
 Creating an HTML file that contains the QR image
 ```bash
@@ -139,6 +155,6 @@ $( od -bc ssn.txt )
 
 eof
 } |
-docker run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
-docker run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > ssn.qr.html
+docker container run -i rwcitek/barcode-gen pandoc --standalone -w html --metadata pagetitle=" " |
+docker container run -i rwcitek/barcode-gen tidy -ashtml -i -w 0 -u -q > ssn.qr.html
 ```

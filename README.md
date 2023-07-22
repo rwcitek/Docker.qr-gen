@@ -14,16 +14,34 @@ docker container run --rm -i rwcitek/barcode-gen \
   zbarimg -q --nodbus --raw -
 ```
 
-## Run an interactive container
+## Running a background container
+Run a service ( daemon ) instance in the background
 ```bash
-# run an instance in the background
-docker container run --rm --name qrgen rwcitek/barcode-gen sleep inf & sleep 1
+docker container run -d --name qrgen rwcitek/barcode-gen sleep inf ; sleep 1
+```
+Using the background instance to create or decode a QR code similar to the code above.
 
+```bash
+# Encoding "Hello, world!" to QR code
+echo 'Hello, world!' |
+docker container exec -i qrgen \
+  qrencode --type=PNG --level=H -o - > hello-world.qrcode.v02.png
+```
+
+```bash
+# Decoding "Hello, world!" QR code
+cat hello-world.qrcode.v02.png |
+docker container exec -i qrgen \
+  zbarimg -q --nodbus --raw -
+```
+
+## An interactive session using the background container
+```bash
 # exec into it
 docker container exec -it qrgen /bin/bash
 ```
 
-## Example 1
+### Example 1
 ```bash
 # generate UUID and qrcode
 uuidgen | tee uuid.txt | qrencode --type=PNG --level=H --output uuid.qrcode.png
@@ -36,7 +54,7 @@ zbarimg -q --nodbus --raw uuid.qrcode.png
 cat uuid.txt
 ```
 
-## Example 2
+### Example 2
 ```bash
 ## encode YAML in qrcode
 cat <<eof | tee id.yaml | qrencode --type=PNG --level=H --output id.qrcode.png
@@ -57,16 +75,9 @@ cat id.yaml | md5sum
 } | uniq -c
 ```
 
-## Exit session and kill container
+### Exit interactive session
 ```bash
 exit
-docker container stop qrgen
-
-```
-
-## Build the image
-```bash
-docker image build --tag rwcitek/barcode-gen docker/
 ```
 
 ## Update/enhance instance
@@ -86,22 +97,6 @@ docker container exec -i qrgen /bin/bash <<'eof'
 eof
 ```
 
-Using the background instance to create or decode a QR code similar to the code above.
-
-```bash
-# Encoding "Hello, world!" to QR code
-echo 'Hello, world!' |
-docker container exec -i qrgen \
-  qrencode --type=PNG --level=H -o - > hello-world.qrcode.v02.png
-```
-
-```bash
-# Decoding "Hello, world!" QR code
-cat hello-world.qrcode.v02.png |
-docker container exec -i qrgen \
-  zbarimg -q --nodbus --raw -
-```
-
 For example, create and read a Data Matrix bar code encoding "Hello, world!".
 ```bash
 # Create Data Matrix barcode
@@ -116,6 +111,16 @@ docker container exec -i qrgen \
   dmtxread -
 ```
 
+### Stop and remove container
+```bash
+docker container stop qrgen
+docker container rm qrgen
+```
+
+## Build the image
+```bash
+docker image build --tag rwcitek/barcode-gen docker/
+```
 
 ## Example in-line use case: formatting SSNs for input into tax prep software
 This takes an SSN, formats it into key strokes, and generates a QR code.
